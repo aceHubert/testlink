@@ -1,0 +1,29 @@
+{
+  "packages": ["."],
+  "npmClient": "yarn",
+  "version": "0.0.1",
+  "command": {
+    "publish": {
+      "conventionalCommits": true,
+      "gitTagVersion": true,
+      "ignoreChanges": [
+        "**/README.md",
+        "**/*.md",
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/coverage/**",
+        "**/test/**"
+      ],
+      "message": "chore(release): publish %s"
+    }
+  },
+  "changelog": {
+    "repo": "aceHubert/testlink-mcp",
+    "labels": {
+      "feat": ":rocket: New Feature",
+      "bug": ":bug: Bug Fix",
+      "breaking": ":boom: Breaking Change"
+    },
+    "cacheDir": ".changelog"
+  }
+}

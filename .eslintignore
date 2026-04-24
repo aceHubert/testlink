@@ -1,0 +1,13 @@
+/.git
+/coverage
+/tmp
+/.changelog
+build
+dist
+esm
+lib
+types
+type-artefacts
+scripts
+node_modules
+version.[jt]s
