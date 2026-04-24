@@ -38,8 +38,7 @@
     "release:alpha": "lerna publish --conventional-commits --conventional-prerelease --preid alpha --dist-tag alpha",
     "release:next": "lerna publish --conventional-commits --conventional-prerelease --preid next --dist-tag next",
     "release:graduate": "lerna publish --conventional-commits --conventional-graduate",
-    "changelog": "node ./scripts/genChangelog.js",
-    "prepublishOnly": "yarn install --mode=skip-build && yarn changelog && yarn build",
+    "prepublishOnly": "yarn install --mode=skip-build && yarn build",
     "lint": "eslint src --ext .ts --max-warnings=0",
     "lint:fix": "eslint src --ext .ts --fix",
     "commit": "git-cz"
