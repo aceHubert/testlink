@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-`src/` 是主代码目录：`index.ts` 提供 MCP Server 入口，`cli.ts` 提供命令行入口，`api.ts` 封装 TestLink XML-RPC 调用。`scripts/` 放发布辅助脚本，例如 `genChangelog.js`。`skills/` 存放配套技能说明。构建产物输出到 `dist/`，不要手改。环境变量示例在 `.env.example`。
+`src/` 是主代码目录：`index.ts` 提供 MCP Server 入口，`cli.ts` 提供命令行入口，`api.ts` 封装 TestLink XML-RPC 调用。`skills/` 存放配套技能说明。构建产物输出到 `dist/`，不要手改。环境变量示例在 `.env.example`。
 
 ## Build, Test, and Development Commands
 
@@ -12,7 +12,6 @@
 - `yarn lint`：对 `src/**/*.ts` 运行 ESLint，要求 `--max-warnings=0`。
 - `yarn lint:fix`：自动修复可修复的 lint 问题。
 - `yarn typecheck`：运行 TypeScript 静态检查，不生成文件。
-- `yarn changelog`：根据发布记录生成变更日志。
 
 ## Coding Style & Naming Conventions
 

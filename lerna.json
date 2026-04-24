@@ -1,12 +1,18 @@
 {
   "packages": ["."],
   "npmClient": "yarn",
-  "version": "0.0.4",
+  "version": "independent",
   "command": {
     "publish": {
       "conventionalCommits": true,
       "gitTagVersion": true,
-      "ignoreChanges": ["**/node_modules/**", "**/dist/**", "**/coverage/**", "**/test/**"],
+      "ignoreChanges": [
+        "**/*.md",
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/coverage/**",
+        "**/test/**"
+      ],
       "message": "chore(release): publish %s"
     }
   },
