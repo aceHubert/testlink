@@ -1,6 +1,6 @@
 {
   "name": "@acehubert/testlink-mcp",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": "aceHuber",
   "license": "MIT",
   "description": "TestLink MCP Server - 让 AI 助手能够管理 TestLink 测试用例、测试套件、测试计划和执行结果",
