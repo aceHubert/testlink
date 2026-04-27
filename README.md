@@ -172,7 +172,20 @@ npm install -g @acehubert/testlink-mcp
 testlink --version
 ```
 
-推荐使用环境变量配置连接信息，避免 API Key 进入 shell 历史：
+推荐使用本地配置或环境变量配置连接信息，避免 API Key 进入普通业务命令的 shell 历史：
+
+```bash
+testlink config set url "https://your-testlink-server.com/testlink"
+testlink config set apiKey "your_api_key"
+testlink config get
+testlink config get url
+testlink config remove apiKey
+```
+
+解析优先级为：命令行参数 > 本地配置 > 环境变量。
+MCP Server 和 CLI 共用同一份本地配置，因此 `config set` 后无需再为 MCP 单独配置同样的值。
+
+也可以使用环境变量配置连接信息：
 
 ```bash
 export TESTLINK_URL="https://your-testlink-server.com/testlink"

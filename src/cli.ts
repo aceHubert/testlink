@@ -8,15 +8,21 @@ import dotenv from "dotenv";
 import yargs, { type Argv, type ArgumentsCamelCase } from "yargs";
 import { hideBin } from "yargs/helpers";
 import { TestLinkAPI, type TestLinkRecord } from "./api.js";
+import {
+  configKeys,
+  inspectTestLinkConfig,
+  removeSavedTestLinkConfig,
+  resolveTestLinkConfig,
+  updateSavedTestLinkConfig,
+  type TestLinkConfigKey,
+  type TestLinkConnectionOptions,
+} from "./config.js";
 
 dotenv.config({ quiet: true });
 
 type CommandArgs = ArgumentsCamelCase<Record<string, unknown>>;
 
-interface TestLinkCliOptions {
-  url?: string;
-  apiKey?: string;
-}
+type TestLinkCliOptions = TestLinkConnectionOptions;
 
 function getString(args: CommandArgs, key: string): string | undefined {
   const value = args[key];
@@ -27,12 +33,12 @@ function addConnectionOptions(parser: Argv): Argv {
   return parser
     .option("url", {
       type: "string",
-      describe: "TestLink 服务地址；未传入时读取 TESTLINK_URL",
+      describe: "服务地址；",
     })
     .option("apiKey", {
       type: "string",
       alias: "api-key",
-      describe: "TestLink API Key；未传入时读取 TESTLINK_API_KEY",
+      describe: "API Key；",
     });
 }
 
@@ -46,22 +52,7 @@ export function getTestLinkCliOptions(args: CommandArgs): TestLinkCliOptions {
 export function resolveTestLinkCliOptions(
   options: TestLinkCliOptions,
 ): Required<TestLinkCliOptions> {
-  const resolvedOptions = {
-    url: options.url ?? process.env.TESTLINK_URL,
-    apiKey: options.apiKey ?? process.env.TESTLINK_API_KEY,
-  };
-
-  if (!resolvedOptions.url || !resolvedOptions.apiKey) {
-    throw new Error(
-      [
-        "请通过命令行参数或环境变量提供 TestLink 连接配置:",
-        "--url / TESTLINK_URL - TestLink 服务地址",
-        "--apiKey / TESTLINK_API_KEY - TestLink API Key",
-      ].join("\n"),
-    );
-  }
-
-  return resolvedOptions as Required<TestLinkCliOptions>;
+  return resolveTestLinkConfig(options);
 }
 
 function getRequiredString(args: CommandArgs, key: string): string {
@@ -92,9 +83,80 @@ function printJsonResult(result: unknown): void {
   console.log(JSON.stringify(result, null, 2));
 }
 
+function printConfigValue(key: TestLinkConfigKey, value: string | undefined): void {
+  console.log(`${key}: ${value ?? "null"}`);
+}
+
+function printConfigValues(config: TestLinkCliOptions): void {
+  printConfigValue("url", config.url);
+  printConfigValue("apiKey", config.apiKey);
+}
+
 function getClient(args: CommandArgs): TestLinkAPI {
   const options = resolveTestLinkCliOptions(getTestLinkCliOptions(args));
   return new TestLinkAPI(options.url, options.apiKey);
+}
+
+function normalizeConfigKey(key: string): TestLinkConfigKey {
+  if (key === "url") return "url";
+  if (key === "apiKey" || key === "api-key") return "apiKey";
+  throw new Error(`不支持的配置项: ${key}，可用配置项: url, apiKey`);
+}
+
+function registerConfigCommands(parser: Argv): Argv {
+  return parser.command(
+    "config <action> [key] [value]",
+    "连接配置操作：get / set / remove",
+    (command) =>
+      command
+        .positional("action", {
+          choices: ["get", "set", "remove"] as const,
+          describe: "操作类型",
+        })
+        .positional("key", {
+          type: "string",
+          choices: configKeys,
+          describe: "配置项：url / apiKey",
+        })
+        .positional("value", {
+          type: "string",
+          describe: "配置值",
+        }),
+    async (args: CommandArgs) => {
+      const action = getRequiredString(args, "action");
+
+      switch (action) {
+        case "get": {
+          const inspection = inspectTestLinkConfig(getTestLinkCliOptions(args));
+          const rawKey = getString(args, "key");
+
+          if (rawKey) {
+            const key = normalizeConfigKey(rawKey);
+            printConfigValue(key, inspection.values[key]);
+            return;
+          }
+
+          printConfigValues(inspection.values);
+          return;
+        }
+        case "set": {
+          const key = normalizeConfigKey(getRequiredString(args, "key"));
+          const value = getRequiredString(args, "value");
+          updateSavedTestLinkConfig(key, value);
+          printConfigValue(key, value);
+          return;
+        }
+        case "remove": {
+          const key = normalizeConfigKey(getRequiredString(args, "key"));
+          removeSavedTestLinkConfig(key);
+          console.log(`${key} removed`);
+          return;
+        }
+        default:
+          throw new Error(`未知操作类型: ${action}`);
+      }
+    },
+  );
 }
 
 function registerProjectCommands(parser: Argv): Argv {
@@ -369,6 +431,7 @@ function registerRequirementCommands(parser: Argv): Argv {
 
 async function runCli(): Promise<void> {
   let parser = addConnectionOptions(yargs(hideBin(process.argv)).scriptName("testlink"));
+  parser = registerConfigCommands(parser);
   parser = registerProjectCommands(parser);
   parser = registerCaseCommands(parser);
   parser = registerSuiteCommands(parser);
