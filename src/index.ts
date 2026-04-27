@@ -15,6 +15,7 @@ import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { TestLinkAPI } from "./api.js";
+import { resolveTestLinkConfig, type TestLinkConnectionOptions } from "./config.js";
 
 export { TestLinkAPI } from "./api.js";
 export type { TestLinkApiOptions } from "./api.js";
@@ -23,10 +24,7 @@ dotenv.config({ quiet: true });
 
 type CommandArgs = Record<string, unknown>;
 
-interface TestLinkMcpOptions {
-  url?: string;
-  apiKey?: string;
-}
+type TestLinkMcpOptions = TestLinkConnectionOptions;
 
 function getString(args: CommandArgs, key: string): string | undefined {
   const value = args[key];
@@ -37,34 +35,19 @@ function addConnectionOptions(parser: ReturnType<typeof yargs>): ReturnType<type
   return parser
     .option("url", {
       type: "string",
-      describe: "TestLink 服务地址；未传入时读取 TESTLINK_URL",
+      describe: "服务地址；",
     })
     .option("apiKey", {
       type: "string",
       alias: "api-key",
-      describe: "TestLink API Key；未传入时读取 TESTLINK_API_KEY",
+      describe: "API Key；",
     });
 }
 
 export function resolveTestLinkMcpOptions(
   options: TestLinkMcpOptions,
 ): Required<TestLinkMcpOptions> {
-  const resolvedOptions = {
-    url: options.url ?? process.env.TESTLINK_URL,
-    apiKey: options.apiKey ?? process.env.TESTLINK_API_KEY,
-  };
-
-  if (!resolvedOptions.url || !resolvedOptions.apiKey) {
-    throw new Error(
-      [
-        "请通过启动参数或环境变量提供 TestLink 连接配置:",
-        "--url / TESTLINK_URL - TestLink 服务地址",
-        "--apiKey / TESTLINK_API_KEY - TestLink API Key",
-      ].join("\n"),
-    );
-  }
-
-  return resolvedOptions as Required<TestLinkMcpOptions>;
+  return resolveTestLinkConfig(options);
 }
 
 function parseMcpOptions(): TestLinkMcpOptions {
